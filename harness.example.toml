@@ -1,0 +1,38 @@
+[model]
+provider = "ollama"
+name = "qwen3:8b"
+host = "http://localhost:11434" # OLLAMA_HOST env var overrides
+temperature = 0.0
+num_ctx = 32768
+think = false
+
+[target]
+name = "cosmicpython"
+repo_url = "https://github.com/cosmicpython/code"
+commit = "14c84797ffa77255d53cf1a02fe6aafda2b68aeb"
+acceptance_dir = "acceptance/cosmic"
+
+[sandbox]
+image = "harness-sandbox-cosmic:latest"
+allowed_programs = ["pytest", "python"]
+command_timeout_s = 120
+memory = "1g"
+cpus = "1.0"
+pids_limit = 256
+env = { PYTHONPATH = "/work/src", PYTHONDONTWRITEBYTECODE = "1", PYTEST_ADDOPTS = "-p no:cacheprovider" }
+
+[limits]
+max_steps = 30
+max_tool_calls = 40
+max_denied = 5
+max_model_retries = 2
+max_output_chars = 8000
+
+[[checks]]
+name = "regression"
+command = ["pytest", "tests/unit", "-q"]
+
+[[checks]]
+name = "acceptance"
+command = ["pytest", "/acceptance", "-q"]
+uses_acceptance = true
